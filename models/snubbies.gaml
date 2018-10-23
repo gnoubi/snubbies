@@ -40,6 +40,7 @@ global
 
 species habitats
 {
+	int DN;
 	aspect base
 	{
 		draw shape color:#gray;
