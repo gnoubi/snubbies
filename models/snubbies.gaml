@@ -43,9 +43,13 @@ species habitats
 	int DN;
 	aspect base
 	{
-		draw shape color:#gray;
+		// draw shape color:#gray;
+		// draw shape color:DN=1 ? #green : (DN=2 ? #blue : (DN=3 ? #yellow :  (DN=4 ? #orange :  #red)));
+		draw shape color:DN=1 ? rgb([0, 128, 0]) : (DN=2 ? rgb([0, 255,0]) : (DN=3 ? rgb([128, 128, 0]) :  (DN=4 ? rgb([255, 128, 0]) :  rgb([255, 0, 0]))));
 	}
 }
+
+
 
 species Snubby_group
 {
@@ -56,7 +60,8 @@ species Snubby_group
 	
 	aspect base
 	{
-		draw shape color:#gray;
+		//draw shape color:#gray;
+		draw shape color:rgb("gray",180);
 	}
 }
 
@@ -68,7 +73,7 @@ species Snubby skills:[moving]
 	
 	aspect base 
 	{
-		draw circle(500#m) color:#red;
+		draw circle(100#m) color:#blue;
 	}
 }
 
