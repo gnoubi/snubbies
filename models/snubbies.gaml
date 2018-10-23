@@ -14,13 +14,14 @@ model snubbies
 global
 {
 	file groups_file <- file("../includes/groups/groups.shp");
-	
+	file habitat <- file("../includes/source2P/source2P.shp");
 	float mean_snubby_speed <- 50#km/#day;
 	
 	
-	geometry shape<- envelope(groups_file);
+	geometry shape<- envelope(habitat);
 	init
 	{
+		create habitats from:habitat with:[DN::int(read("DN"))];
 		step <- 1#day;
 		create Snubby_group from:groups_file with:[id::int(read("ID")),name::string(read("NAME1")),init_population::int(read("POPULATION"))]
 		{
@@ -31,9 +32,19 @@ global
 				location <- any_location_in(my_group.shape);
 			}
 		}
+		
+		
 	}
 }
 
+
+species habitats
+{
+	aspect base
+	{
+		draw shape color:#gray;
+	}
+}
 
 species Snubby_group
 {
@@ -67,8 +78,11 @@ experiment run
 	{
 		display map type:opengl
 		{
+			species habitats aspect:base;
 			species Snubby_group aspect:base;
 			species Snubby aspect:base;
 		}
+		
+
 	}
 }
