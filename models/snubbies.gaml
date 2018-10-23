@@ -13,23 +13,23 @@ model snubbies
 
 global
 {
-	file groups_file <- file("../includes/groups/groups.shp");
-	file habitat <- file("../includes/source2P/source2P.shp");
-	float mean_snubby_speed <- 50#km/#day;
+	file groups_file <- file("../includes/groups/groups.shp"); // read the shapefile of the groups
+	file habitat <- file("../includes/source2P/source2P.shp"); // read the shapefile of the habitats
+	float mean_snubby_speed <- 50#km/#day; // mean spread of a travelling monkey per day
 	
 	
-	geometry shape<- envelope(habitat);
+	geometry shape<- envelope(habitat); // define the area under study (universe)
 	init
 	{
-		create habitats from:habitat with:[DN::int(read("DN"))];
-		step <- 1#day;
-		create Snubby_group from:groups_file with:[id::int(read("ID")),name::string(read("NAME1")),init_population::int(read("POPULATION"))]
+		create habitats from:habitat with:[DN::int(read("DN"))]; // create the agent "habitats" with its shapefile attribute 
+		step <- 1#day; // model step; one iteration is one day
+		create Snubby_group from:groups_file with:[id::int(read("ID")),name::string(read("NAME1")),init_population::int(read("POPULATION"))] // create the agent "groups file" with its shapefile attributes 
 		{
 			Snubby_group my_group <- self; //the group which the snubbies that are going to be created belongs to
 			
-			create Snubby number:init_population
+			create Snubby number:init_population // create individual monkeys based on the population size in each group 
 			{
-				location <- any_location_in(my_group.shape);
+				location <- any_location_in(my_group.shape); // location anywhere within the group perimeter
 			}
 		}
 		
@@ -77,7 +77,7 @@ experiment run
 {
 	output
 	{
-		display map type:opengl
+		display map type:opengl // draw the maps
 		{
 			species habitats aspect:base;
 			species Snubby_group aspect:base;
