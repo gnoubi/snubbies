@@ -173,13 +173,18 @@ experiment run
 {
 	parameter "v_max" var:max_snubby_speed;
 	parameter "s_max" var:max_snubby_survival_init;
+	parameter "explorer_snubbies" var:explorer_snubbies_init;
+	
 	parameter "viscosity_factor_habitat_1" var:viscosity_init_habitat_1;
 	parameter "viscosity_factor_habitat_2" var:viscosity_init_habitat_2;
 	parameter "viscosity_factor_habitat_3" var:viscosity_init_habitat_3;
 	parameter "viscosity_factor_habitat_4" var:viscosity_init_habitat_4;
 	parameter "viscosity_factor_habitat_5" var:viscosity_init_habitat_5;
-	
-	parameter "explorer_snubbies" var:explorer_snubbies_init;
+	parameter "security_factor_habitat_1" var:security_init_habitat_1;
+	parameter "security_factor_habitat_2" var:security_init_habitat_2;
+	parameter "security_factor_habitat_3" var:security_init_habitat_3;
+	parameter "security_factor_habitat_4" var:security_init_habitat_4;
+	parameter "security_factor_habitat_5" var:security_init_habitat_5;
 	
 	output
 	{
