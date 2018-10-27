@@ -77,11 +77,16 @@ global
 		
 	}
 	
+	
+	
+	/* save a shapefile of the snubbies into the folder outputs*/
 	reflex save_snubbies when:every(1#year ) and cycle!=0
 	{
 		write "../outputs/snubbies_"+current_date.year+"_"+cycle+".shp";
 //	save Snubby  attributes: ["name"::name,"origin"::origin_group_id,"current"::current_group_id]  to:"../outputs/snubbies_"+current_date.year+"_"+cycle+".shp" type:"shp";
 	}
+	
+	/* save a summary of group composition into the folder outputs*/
 	reflex save_groups when:every(1#year ) and cycle!=0
 	{
 		list<int> line<-[];
@@ -160,6 +165,8 @@ species Snubby skills:[moving]
 		draw circle(500#m) color:#blue;
 	}
 }
+
+
 
 
 experiment run
