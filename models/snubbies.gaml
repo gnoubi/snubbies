@@ -40,7 +40,7 @@ global
 	{
 		step <- 1#hour;
 		max_snubby_survival_hour<- convert_probability_from_year_to_hour(max_snubby_survival_init);
-		float explorer_snubbies <- convert_probability_from_year_to_hour(explorer_snubbies_init);
+		explorer_snubbies_hour <- convert_probability_from_year_to_hour(explorer_snubbies_init);
 		create habitats from:habitat with:[DN::int(read("DN"))]
 		{
 			switch(DN)
