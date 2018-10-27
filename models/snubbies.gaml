@@ -80,7 +80,7 @@ global
 	reflex save_snubbies when:every(1#year ) and cycle!=0
 	{
 		write "../outputs/snubbies_"+current_date.year+"_"+cycle+".shp";
-		save Snubby  attributes: ["name"::name,"origin"::origin_group_id,"current"::current_group_id]  to:"../outputs/snubbies_"+current_date.year+"_"+cycle+".shp" type:"shp";
+//	save Snubby  attributes: ["name"::name,"origin"::origin_group_id,"current"::current_group_id]  to:"../outputs/snubbies_"+current_date.year+"_"+cycle+".shp" type:"shp";
 	}
 	reflex save_groups when:every(1#year ) and cycle!=0
 	{
@@ -115,10 +115,15 @@ species habitats
 	float viscosity;
 	float security;
 	aspect base
-	{
-		// draw shape color:#gray;
-		// draw shape color:DN=1 ? #green : (DN=2 ? #blue : (DN=3 ? #yellow :  (DN=4 ? #orange :  #red)));
-		draw shape color:DN=1 ? rgb([0, 128, 0]) : (DN=2 ? rgb([0, 255,0]) : (DN=3 ? rgb([128, 128, 0]) :  (DN=4 ? rgb([255, 128, 0]) :  rgb([255, 0, 0]))));
+	{		
+		switch (DN)
+		{
+				match 1 {draw shape color:rgb([0, 128, 0]); } 
+				match 2 {draw shape color:rgb([0, 255,0]); } 
+				match 3 {draw shape color:rgb([128, 128, 0]); } 
+				match 4 {draw shape color:rgb([255, 128, 0]); } 
+				match 5 {draw shape color:rgb([255, 0, 0]); } 
+		}
 	}
 }
 
@@ -152,7 +157,7 @@ species Snubby skills:[moving]
 	
 	aspect base 
 	{
-		draw circle(100#m) color:#blue;
+		draw circle(500#m) color:#blue;
 	}
 }
 
@@ -171,12 +176,15 @@ experiment run
 	
 	output
 	{
-		display map //type:opengl // draw the maps
-		{
-			species habitats aspect:base;
-			species Snubby_group aspect:base;
-			species Snubby aspect:base;
-		}
+		/* display color map + groups + monkeys */
+//		display map //type:opengl // draw the maps
+//		{
+//			species habitats aspect:base;
+//			species Snubby_group aspect:base;
+//			species Snubby aspect:base;
+//		}
+
+		/* display groups + monkeys only*/
 		display reading_map //type:gui // draw the maps
 		{
 			species Snubby_group aspect:base;
