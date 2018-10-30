@@ -36,6 +36,12 @@ global
 	
 	
 	geometry shape<- envelope(habitat); // define the area under study (universe)
+	
+	
+	reflex cddd
+	{
+		write "cycle xxxxx"+cycle;
+	}
 	init
 	{
 		step <- 1#hour;
@@ -77,12 +83,12 @@ global
 		
 	}
 	
-	reflex save_snubbies when:every(1#year ) and cycle!=0
+	/*reflex save_snubbies when:every(1#year ) and cycle!=0
 	{
 		write "../outputs/snubbies_"+current_date.year+"_"+cycle+".shp";
 		save Snubby  attributes: ["name"::name,"origin"::origin_group_id,"current"::current_group_id]  to:"../outputs/snubbies_"+current_date.year+"_"+cycle+".shp" type:"shp";
-	}
-	reflex save_groups when:every(1#year ) and cycle!=0
+	}*/
+	reflex save_groups when:false and every(1#year ) and cycle!=0
 	{
 		list<int> line<-[];
 		
@@ -138,7 +144,7 @@ species Snubby_group
 	}
 }
 
-species Snubby skills:[moving]
+species Snubby  skills:[moving]
 {
 	Snubby_group origin;
 	Snubby_group current <-nil;
