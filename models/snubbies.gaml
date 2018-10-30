@@ -46,7 +46,7 @@ global
 	{
 		step <- 1#hour;
 		max_snubby_survival_hour<- convert_probability_from_year_to_hour(max_snubby_survival_init);
-		float explorer_snubbies <- convert_probability_from_year_to_hour(explorer_snubbies_init);
+		explorer_snubbies_hour <- convert_probability_from_year_to_hour(explorer_snubbies_init);
 		create habitats from:habitat with:[DN::int(read("DN"))]
 		{
 			switch(DN)
@@ -121,10 +121,15 @@ species habitats
 	float viscosity;
 	float security;
 	aspect base
-	{
-		// draw shape color:#gray;
-		// draw shape color:DN=1 ? #green : (DN=2 ? #blue : (DN=3 ? #yellow :  (DN=4 ? #orange :  #red)));
-		draw shape color:DN=1 ? rgb([0, 128, 0]) : (DN=2 ? rgb([0, 255,0]) : (DN=3 ? rgb([128, 128, 0]) :  (DN=4 ? rgb([255, 128, 0]) :  rgb([255, 0, 0]))));
+	{		
+		switch (DN)
+		{
+				match 1 {draw shape color:rgb([0, 128, 0]); } 
+				match 2 {draw shape color:rgb([0, 255,0]); } 
+				match 3 {draw shape color:rgb([128, 128, 0]); } 
+				match 4 {draw shape color:rgb([255, 128, 0]); } 
+				match 5 {draw shape color:rgb([255, 0, 0]); } 
+		}
 	}
 }
 
@@ -158,31 +163,41 @@ species Snubby  skills:[moving]
 	
 	aspect base 
 	{
-		draw circle(100#m) color:#blue;
+		draw circle(500#m) color:#blue;
 	}
 }
+
+
 
 
 experiment run
 {
 	parameter "v_max" var:max_snubby_speed;
 	parameter "s_max" var:max_snubby_survival_init;
+	parameter "explorer_snubbies" var:explorer_snubbies_init;
+	
 	parameter "viscosity_factor_habitat_1" var:viscosity_init_habitat_1;
 	parameter "viscosity_factor_habitat_2" var:viscosity_init_habitat_2;
 	parameter "viscosity_factor_habitat_3" var:viscosity_init_habitat_3;
 	parameter "viscosity_factor_habitat_4" var:viscosity_init_habitat_4;
 	parameter "viscosity_factor_habitat_5" var:viscosity_init_habitat_5;
-	
-	parameter "explorer_snubbies" var:explorer_snubbies_init;
+	parameter "security_factor_habitat_1" var:security_init_habitat_1;
+	parameter "security_factor_habitat_2" var:security_init_habitat_2;
+	parameter "security_factor_habitat_3" var:security_init_habitat_3;
+	parameter "security_factor_habitat_4" var:security_init_habitat_4;
+	parameter "security_factor_habitat_5" var:security_init_habitat_5;
 	
 	output
 	{
-		display map //type:opengl // draw the maps
-		{
-			species habitats aspect:base;
-			species Snubby_group aspect:base;
-			species Snubby aspect:base;
-		}
+		/* display color map + groups + monkeys */
+//		display map //type:opengl // draw the maps
+//		{
+//			species habitats aspect:base;
+//			species Snubby_group aspect:base;
+//			species Snubby aspect:base;
+//		}
+
+		/* display groups + monkeys only*/
 		display reading_map //type:gui // draw the maps
 		{
 			species Snubby_group aspect:base;
