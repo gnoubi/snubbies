@@ -1,0 +1,197 @@
+
+\documentclass[a4paper,12pt]{book}
+\usepackage{natbib}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage[frenchb]{babel} % If you write in French
+\usepackage[english]{babel} % If you write in English
+\usepackage{a4wide}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+%\usepackage{subfig}
+%\usepackage{tikz}
+%\usetikzlibrary{shapes,arrows}
+%\usepackage{pgfplots}
+%\pgfplotsset{compat=newest}
+%\pgfplotsset{plot coordinates/math parser=false}
+%\newlength\figureheight
+%\newlength\figurewidth
+%\pgfkeys{/pgf/number format/.cd,
+%set decimal separator={,\!},
+%1000 sep={\,},
+%}
+%\usepackage{ifthen}
+%\usepackage{ifpdf}
+
+%\ifpdf
+%\usepackage[pdftex]{hyperref}
+%\else
+%\usepackage{hyperref}
+%\fi
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=false, %set true if you want colored links
+	linktoc=all,     %set to all if you want both sections and subsections linked
+	linkcolor=blue,  %choose some color if you want links to stand out
+	urlcolor=blue,
+	linktocpage
+}
+\usepackage{makecell} % manage linebreak within a cell
+
+\renewcommand{\baselinestretch}{1.05}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyfoot{}
+\fancyhead[LE,RO]{\bfseries\thepage}
+\fancyhead[RE]{\bfseries\nouppercase{\leftmark}}
+\fancyhead[LO]{\bfseries\nouppercase{\rightmark}}
+\setlength{\headheight}{15pt}
+
+\let\headruleORIG\headrule
+\renewcommand{\headrule}{\color{black} \headruleORIG}
+\renewcommand{\headrulewidth}{1.0pt}
+\usepackage{colortbl}
+\arrayrulecolor{black}
+\fancypagestyle{plain}{
+  \fancyhead{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+\makeatletter
+\def\@textbottom{\vskip \z@ \@plus 1pt}
+\let\@texttop\relax
+\makeatother
+
+\makeatletter
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else%
+  \hbox{}%
+  \thispagestyle{empty}%
+  \newpage%
+  \if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother
+
+\usepackage{amsthm}
+\usepackage{amssymb,amsmath,bbm}
+\usepackage{array}
+\usepackage{bm}
+\usepackage{multirow}
+\usepackage[footnote]{acronym}
+
+\usepackage{framed}
+\usepackage{listings}
+%\lstset{language=R,keywordstyle=\color{blue},basicstyle=\ttfamily,breaklines=true}
+\lstset{ 
+	language=R,                     % the language of the code
+	basicstyle=\ttfamily, % the size of the fonts that are used for the code
+	numbers=left,                   % where to put the line-numbers
+	numberstyle=\color{Blue},  % the style that is used for the line-numbers
+	stepnumber=1,                   % the step between two line-numbers. If it is 1, each line
+	% will be numbered
+	numbersep=5pt,                  % how far the line-numbers are from the code
+	backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+	showspaces=false,               % show spaces adding particular underscores
+	showstringspaces=false,         % underline spaces within strings
+	showtabs=false,                 % show tabs within strings adding particular underscores
+	frame=single,                   % adds a frame around the code
+	rulecolor=\color{Gray},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+	tabsize=2,                      % sets default tabsize to 2 spaces
+	captionpos=b,                   % sets the caption-position to bottom
+	breaklines=true,                % sets automatic line breaking
+	breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+	keywordstyle=\color{RoyalBlue},      % keyword style
+	commentstyle=\color{LimeGreen},   % comment style
+	stringstyle=\color{ForestGreen},      % string literal style
+	deletekeywords={max,factor,local},
+	morekeywords={expe2df,runexpplan,writemodelparameterfile,setparametervalue,setfinalstep,setoutputframerate,setmodelpath,setsimulationid,setseed,addtoexperimentplan,paste0,readNamesXMLOutputs,xmlToDataFrame}
+} 
+
+\usepackage{datetime}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%
+%%% First page %%%
+%%%%%%%%%%%%%%%%%%
+
+\begin{titlepage}
+\begin{center}
+
+\includegraphics[width=0.8\textwidth]{IMG_1597b}\\[0.5cm]
+
+
+% Title
+\rule{\linewidth}{0.5mm} \\[0.4cm]
+{ \huge \bfseries Multi-agent simulation\\with Gama and R \\[0.4cm]
+\Large Practical Training Manual}
+\rule{\linewidth}{0.5mm} \\[0.5cm]
+%\normalsize Website: \url{http://moodle.univ-fcomte.fr/course/view.php?id=8811}
+
+
+% Author
+\noindent
+
+\large Patrick \textsc{Giraudoux} and  Nicolas \textsc{Marilleau}\\[0.5cm]
+
+\includegraphics[width=0.8\textwidth]{Logos}\\[0.5cm]
+
+\vfill
+
+% Bottom of the page
+{\small Version of \today, \currenttime}
+
+
+\end{center}
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Non-significant pages %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frontmatter
+
+
+\clearpage
+
+
+
+
+\vspace*{\fill}
+
+\begin{center}
+\includegraphics[width=0.7\textwidth]{LogoSoftwares}
+	\color{red}
+	\fbox{
+		\begin{minipage}{0.7\textwidth}
+			\large \textbf{Prerequisite}: to have acquired basic notions in R (e.g. workspace, package, function, data.frame, list, etc.) and GIS (e.g. shapefile, attribute table, etc.) and corresponding skills.
+		\end{minipage}
+	}
+\end{center}
+\vfill
+
+\tableofcontents
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Content of the report and references %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\mainmatter
+\pagestyle{fancy}
+
+\cleardoublepage
+
+\include{01-ModelPresentation}
+\include{02-GamaModel}
+\include{03-Preparing}
+
+%\appendix
+
+\bibliographystyle{apa-good}
+\bibliography{BiblioManual}
+
+\clearpage
+
+
+\end{document}

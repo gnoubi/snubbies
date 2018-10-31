@@ -1,0 +1,188 @@
+\chapter{Preparing experiments and analyzing results in R}
+\label{chap:Preparing experiments}
+
+Most likely, for full size research, you will carry out simulations on intensive computing systems with hundreds of cores available  in parallel, to run thousands of experiments. Intensive computing systems generally use UNIX and simulations can be run in shell scripts using gama-headless.bat as an entry point. R can be run on such a platform as well and be used for simulations. Here, for teaching purpose, this training manual presents how to do it in R on a personal computer, on a Windows platform. Your computer has likely no more than 2-4 CPU, and it is advisable not to allocate more than two to the job (we will see later how to do it). This means that running a large number of simulations and to simulate on a large number of time steps can be time consuming in this context.
+
+\section{Installing gamar}
+\texttt{gamar} is a R package  available at \url{https://github.com/choisy/gamar}. With the \texttt{library(devtools)}, if not already installed, it can be installed on line as following:
+
+\begin{lstlisting}
+library(devtools)
+devtools::install_github("choisy/gamar")
+library(gamar)
+\end{lstlisting}
+
+First, one declares the path to the program Gama.exe. Here below an example, but the path you are going to write must be adapted to your own computer:
+
+\begin{lstlisting}
+defpath("C:/Program Files/GAMA1.7RC2.Windows.64bits")
+\end{lstlisting}
+
+\section{Preparing experiments}
+
+
+\subsection{Reading the model}
+
+Now, one must read the model (here \texttt{snubbies.gaml}) and extract informations that will be used by R. The path to the model must be declared explicitely (here \texttt{snubbies.gaml}  is in the folder \texttt{"U:/Users/pgiraudo2/gama\_workspace/snubbies/models")}. Again this to adapt to your own computer.
+
+\begin{lstlisting}
+experiment1 <- getmodelparameter("U:/Users/pgiraudo2/gama_workspace/snubbies/models/snubbies.gaml","run")
+experiment1
+\end{lstlisting}
+
+
+For convenience, we have prepared some home-made functions to ease readings and parameter handling. They are in the file \texttt{HomeFunctions.r}. One sources it, and get a data.frame with attributes:
+
+\label{lab:sourcefunction}
+\begin{lstlisting}
+source("Homefunctions.r")
+ex1<-expe2df(experiment1)
+ex1
+attributes(ex1)
+\end{lstlisting}
+
+\subsection{Preparing the simulations}
+
+The duration of each simulation is stored in a variable, here named \texttt{simulation\_duration} and the number of simulations to run in the variable \texttt{B}
+
+\begin{lstlisting}
+simulation_duration <- 5 * 365 * 24 # five years (step is one hour)
+B<-10 # number of simulations
+\end{lstlisting}
+
+Now, a data.frame must be prepared with the parameter values of each simulation on each row. Note that parameters can be explored randomly allocating values between limits. See for instance the function \texttt{runif} in R (but many others are available).
+
+\begin{lstlisting}
+?runif
+\end{lstlisting}
+
+Values can be defined quite flexibly and the value(s) of a given parameter can be used as a function of another. See example below.
+
+\label{lab:simuls}
+\begin{lstlisting}
+simuls<-data.frame(
+v_max=0.3472222,
+s_max=0.5,
+explorer_snubbies=runif(B,0.001,0.1), # random allocation between 0.001 and 0.1 (uniform distribution)
+viscosity_factor_habitat_1=runif(B,0.9,1),
+viscosity_factor_habitat_2=viscosity_factor_habitat_1*0.9, # the value is defined as a function of another value; here we want viscosity_factor_habitat_2 always be 0.9*viscosity_factor_habitat_1
+viscosity_factor_habitat_3=0.5,
+viscosity_factor_habitat_4=0.1,
+viscosit_factor_habitat_5=0,
+security_factor_habitat_1=1,
+security_factor_habitat_2=0.9,
+security_factor_habitat_3=0.5,
+security_factor_habitat_4=0.1,
+security_factor_habitat_5=0
+)
+\end{lstlisting}
+
+Then, experiments can be prepared. This will end up by the creation of one variable \texttt{experimentplan} and as many XML files as experiments (e.g. the number of row of \texttt{simuls}). \textcolor{red}{Pay attention about the unusual way to specify the path with \texttt{setmodelpath}, with a slash "/U:/..." at the beginning. This a provisory way to get around a bug of gama-headless running on Windows}.
+
+\begin{lstlisting}
+for (i in 1:nrow(simuls)) {
+local_experiment <- experiment1
+local_experiment <-  setparametervalue(local_experiment,"max_snubby_speed",simuls[i,"v_max"])
+local_experiment <-  setparametervalue(local_experiment,"max_snubby_survival_init",simuls[i,"s_max"])
+local_experiment <-  setparametervalue(local_experiment,"explorer_snubbies_init",simuls[i,"explorer_snubbies"])
+local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_1",simuls[i,"viscosity_factor_habitat_1"])
+local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_2",simuls[i,"viscosity_factor_habitat_2"])
+local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_3",simuls[i,"viscosity_factor_habitat_3"])
+local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_4",simuls[i,"viscosity_factor_habitat_4"])
+local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_5",simuls[i,"viscosity_factor_habitat_5"])
+local_experiment <-  setparametervalue(local_experiment," security_init_habitat_1",simuls[i,"security_factor_habitat_1"])
+local_experiment <-  setparametervalue(local_experiment," security_init_habitat_2",simuls[i,"security_factor_habitat_2"])
+local_experiment <-  setparametervalue(local_experiment," security_init_habitat_3",simuls[i,"security_factor_habitat_3"])
+local_experiment <-  setparametervalue(local_experiment," security_init_habitat_4",simuls[i,"security_factor_habitat_4"])
+local_experiment <-  setparametervalue(local_experiment," security_init_habitat_5",simuls[i,"security_factor_habitat_5"])
+
+local_experiment <- setfinalstep(local_experiment,simulation_duration)
+
+local_experiment <- setoutputframerate(local_experiment,"map",10)
+local_experiment <- setoutputframerate(local_experiment,"reading_map",10)
+local_experiment <- setsimulationid(local_experiment,i)
+local_experiment <- setmodelpath(local_experiment,"/U:/Users/pgiraudo2/gama_workspace/snubbies/models/snubbies.gaml")
+
+local_experiment <- setseed(local_experiment,1)
+
+if(i<2)
+{
+
+experimentplan <- addtoexperimentplan(simulation = local_experiment)
+}
+else
+{
+experimentplan <- addtoexperimentplan(simulation = local_experiment,experimentplan = experimentplan)
+}
+outFile <- paste0("./input_",formatC(i,width=nchar(nrow(simuls)),flag="0"),".xml")
+
+writemodelparameterfile(experimentplan,outFile)
+}
+
+\end{lstlisting}
+
+The  variable of interest is \texttt{experimentplan}. However here, additionally, XML files are saved on the disk with \texttt{writemodelparameterfile}. This can be useful if simulations are run not from R on intensive computing systems and UNIX platforms. There, running simulations with a UNIX shell script is system dependent and will use those XML files (in this case, see with the IT manager how to proceed). Here, with this R script, XML files have been written in the workspace. You can see them either  using Windows Explorer or from R with the following command:
+
+\begin{lstlisting}
+dir()
+\end{lstlisting}
+
+\section{Running simulations}
+
+
+Simulations are run very simply then. We add some code lines to get the duration of the simulations at the end.
+
+\begin{lstlisting}
+t0<-Sys.time() # store the start time
+runexpplan(experimentplan,hpc=2) # run the simulations
+t1<-Sys.time() # store the end time
+t1-t0
+\end{lstlisting}
+
+
+\section{Reading results}
+
+Simulations results are stored in the folder \texttt{./workgamar}. There one finds:
+
+\begin{itemize}
+	\item as many files as experiments, named \texttt{run\_1.xml}, \texttt{run\_2.xml}, etc. Those files just describe the values of the input parameters. No point to read them, all useful information is in the data.frame \texttt{simuls} (see above \ref{lab:simuls}).
+	\item a folder named \texttt{out\_run\_1} (or \texttt{out\_run\_2}, \texttt{out\_run\_3}, etc. depending on the number of runs executed before). One finds the following inside:
+	\begin{itemize}
+		\item a folder named  \texttt{snapshot} containing bitmaps. Note the file name gives the number of the experiment and the step. E.g.\texttt{ reading\_map0-10.png} means experiment \#1 (the experiment numbers are incremented from 0), step 10.
+		\item text files \texttt{console-outputs-0.txt}, \texttt{console-outputs-1.txt}, etc. corresponding to the console outputs of experiment \#1, \#2, etc. They are not of much interest when everything goes smoothly, but useful to identify where a simulation has crashed, should it happen.
+		\item xml files \texttt{simulation-outputs0.xml}, \texttt{simulation-outputs01.xml}, etc. corresponding to the outputs of experiment \#1, \#2, etc.
+	\end{itemize}
+\end{itemize}
+
+One needs some R code to read the XML file. Here we use a home-made function \texttt{readNamesXMLOutputs} to read variable names (it as been sourced before see \ref{lab:sourcefunction})
+
+\begin{lstlisting}
+library(XML)
+
+path<-paste0("./workgamar/out_run_1/") # the path to the XML files
+outs<-dir(path,pattern="*.xml") # one reads them
+outs<-outs[order(as.numeric(substr(outs,19,nchar(outs)-4)))] # to get the files in the right order whatever the number of digit
+
+outs<-paste0(path,outs) # now the full path with file names
+outs
+
+mycolnames<-readNamesXMLOutputs(outs[1]) # one uses a home made function to extract the variables names from one of the XML files
+
+results<-rep(list(NA),length(outs)) # one prepares an empty list to store the readings
+for(i in 1:length(outs)) {
+	results[[i]]<-xmlToDataFrame(outs[i])  # we read the XML file into a data.frame
+	names(results[[i]])<-mycolnames # one gives names to columns
+}
+
+names(results)<-outs # one gives a name to each experiments
+
+results
+
+\end{lstlisting}
+
+
+
+
+\section{Analysing results}
+
+To come soon...
