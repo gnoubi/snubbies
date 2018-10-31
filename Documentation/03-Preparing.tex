@@ -1,7 +1,7 @@
 \chapter{Preparing experiments and analyzing results in R}
 \label{chap:Preparing experiments}
 
-Most likely, for full size research, you will carry out simulations on intensive computing systems with hundreds of cores available  in parallel, to run thousands of experiments. Intensive computing systems generally use UNIX and simulations can be run in shell scripts using gama-headless.bat as an entry point. R can be run on such a platform as well and be used for simulations. Here, for teaching purpose, this training manual presents how to do it in R on a personal computer, on a Windows platform. Your computer has likely no more than 2-4 CPU, and it is advisable not to allocate more than two to the job (we will see later how to do it). This means that running a large number of simulations and to simulate on a large number of time steps can be time consuming in this context.
+Most likely, for full size research, you will carry out simulations on intensive computing systems with hundreds of cores available  in parallel, to run thousands of experiments. Intensive computing systems generally use UNIX and simulations can be run in shell scripts using gama-headless.bat as an entry point. R can be run on such a platform as well and be used for simulations. Here, for teaching purpose, this training manual presents how to do it in R on Windows using a personal computer. Your computer has likely no more than 2-4 CPU, and it is advisable not to allocate more than two to the job (we will see later how to do it). In this context, running a large number of simulations or to simulate on a large number of time steps can be time consuming.
 
 \section{Installing gamar}
 \texttt{gamar} is a R package  available at \url{https://github.com/choisy/gamar}. With the \texttt{library(devtools)}, if not already installed, it can be installed on line as following:
@@ -43,14 +43,14 @@ attributes(ex1)
 
 \subsection{Preparing the simulations}
 
-The duration of each simulation is stored in a variable, here named \texttt{simulation\_duration} and the number of simulations to run in the variable \texttt{B}
+The duration of each simulation is stored in a variable, here named \texttt{simulation\_duration} and the number of experiments to run in the variable \texttt{B}
 
 \begin{lstlisting}
 simulation_duration <- 5 * 365 * 24 # five years (step is one hour)
 B<-10 # number of simulations
 \end{lstlisting}
 
-Now, a data.frame must be prepared with the parameter values of each simulation on each row. Note that parameters can be explored randomly allocating values between limits. See for instance the function \texttt{runif} in R (but many others are available).
+Now, a data.frame must be prepared with each row the parameter values of each experiment. Note that parameters can be explored randomly allocating values between limits. See for instance the function \texttt{runif} in R (but many others are available).
 
 \begin{lstlisting}
 ?runif
@@ -77,7 +77,7 @@ security_factor_habitat_5=0
 )
 \end{lstlisting}
 
-Then, experiments can be prepared. This will end up by the creation of one variable \texttt{experimentplan} and as many XML files as experiments (e.g. the number of row of \texttt{simuls}). \textcolor{red}{Pay attention about the unusual way to specify the path with \texttt{setmodelpath}, with a slash "/U:/..." at the beginning. This a provisory way to get around a bug of gama-headless running on Windows}.
+Then, experiments can be prepared. This will end up by the creation of one variable \texttt{experimentplan} and as many XML files as experiments (e.g. the number of row of \texttt{simuls}). \textcolor{red}{Pay attention about the unusual way to specify the path with \texttt{setmodelpath}, with a slash "/U:/..." at the beginning. This is a provisory way to get around a bug of gama-headless running on Windows}.
 
 \begin{lstlisting}
 for (i in 1:nrow(simuls)) {
@@ -134,7 +134,7 @@ Simulations are run very simply then. We add some code lines to get the duration
 
 \begin{lstlisting}
 t0<-Sys.time() # store the start time
-runexpplan(experimentplan,hpc=2) # run the simulations
+runexpplan(experimentplan,hpc=2) # run the simulations on 2 CPU
 t1<-Sys.time() # store the end time
 t1-t0
 \end{lstlisting}
@@ -159,9 +159,9 @@ One needs some R code to read the XML file. Here we use a home-made function \te
 \begin{lstlisting}
 library(XML)
 
-path<-paste0("./workgamar/out_run_1/") # the path to the XML files
+path<-"./workgamar/out_run_1/" # the path to the XML files
 outs<-dir(path,pattern="*.xml") # one reads them
-outs<-outs[order(as.numeric(substr(outs,19,nchar(outs)-4)))] # to get the files in the right order whatever the number of digit
+outs<-outs[order(as.numeric(substr(outs,19,nchar(outs)-4)))] # to get the files in the right order whatever the number of digit (to avoid this order: 1,11,12,13,...,2, 20, 21,...)
 
 outs<-paste0(path,outs) # now the full path with file names
 outs
