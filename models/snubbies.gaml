@@ -196,7 +196,7 @@ experiment run
 //			species Snubby_group aspect:base;
 //			species Snubby aspect:base;
 //		}
-
+		monitor "viscosity_factor_habitat_1" value:viscosity_init_habitat_1;
 		/* display groups + monkeys only*/
 		display reading_map //type:gui // draw the maps
 		{
