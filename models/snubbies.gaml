@@ -156,9 +156,34 @@ species Snubby  skills:[moving]
 	int origin_group_id ->{origin.id};
 	int current_group_id ->{current=nil?-1:current.id};
 	float my_speed;
-	reflex walk
+	bool already_explore <- false;
+	
+	reflex walk when: current = nil
 	{
 		do wander speed:max_snubby_speed amplitude:60.0;
+	}
+	
+	reflex be_explorer when:already_explore = false and origin = current
+	{
+		bool explore <- flip(explorer_snubbies_hour);
+		if(explore = nil)
+		{
+			current <- nil;
+		}
+	}
+	reflex be_killed 
+	{
+		habitats local_group <- first(habitats overlapping(self.location));
+		float secu <- local_group.security;
+		float probability_to_die <- local_group.security*max_snubby_survival_hour;
+		if(flip(probability_to_die)) {
+			create Snubby number:1 {
+				location <- any_location_in(origin.shape);
+				origin <- myself.origin;
+				current <- myself.origin;
+			}
+			do die;		
+		}
 	}
 	
 	aspect base 
@@ -190,12 +215,12 @@ experiment run
 	output
 	{
 		/* display color map + groups + monkeys */
-//		display map //type:opengl // draw the maps
-//		{
-//			species habitats aspect:base;
-//			species Snubby_group aspect:base;
-//			species Snubby aspect:base;
-//		}
+		display map //type:opengl // draw the maps
+		{
+			species habitats aspect:base;
+			species Snubby_group aspect:base;
+			species Snubby aspect:base;
+		}
 		monitor "viscosity_factor_habitat_1" value:viscosity_init_habitat_1;
 		/* display groups + monkeys only*/
 		display reading_map //type:gui // draw the maps
