@@ -15,6 +15,7 @@ global
 {
 	file groups_file <- file("../includes/groups/groups.shp"); // read the shapefile of the groups
 	file habitat <- file("../includes/source2P/source2P.shp"); // read the shapefile of the habitats
+	file world_enveloppe <- file("../includes/source2P_envconc/source2P_envconc.shp");
 	float max_snubby_speed <-30#km/#day;
 	float max_snubby_survival_init <- 0.5;
 	float max_snubby_survival_hour <- 0.0;
@@ -31,22 +32,23 @@ global
 	float security_init_habitat_4 <- 0.1;
 	float security_init_habitat_5 <- 0.0;
 
-	float explorer_snubbies_init <- 0.01;
+	float explorer_snubbies_init <- 0.01; //0.01;
 	float explorer_snubbies_hour<- 0.0;
 	
 	
-	geometry shape<- envelope(habitat); // define the area under study (universe)
+	geometry shape<- envelope(world_enveloppe); // define the area under study (universe)
+	geometry world_enveleloppe_shape;
 	
-	
-	reflex cddd
-	{
-		write "cycle xxxxx"+cycle;
-	}
 	init
 	{
-		step <- 1#hour;
+		step <- 1 #hour;
 		max_snubby_survival_hour<- convert_probability_from_year_to_hour(max_snubby_survival_init);
 		explorer_snubbies_hour <- convert_probability_from_year_to_hour(explorer_snubbies_init);
+		write "truc hour "+explorer_snubbies_hour;
+		create world_env from: world_enveloppe
+		{}
+		world_enveleloppe_shape <- first(world_env).shape;
+		
 		create habitats from:habitat with:[DN::int(read("DN"))]
 		{
 			switch(DN)
@@ -76,6 +78,8 @@ global
 			{
 				location <- any_location_in(my_group.shape); // location anywhere within the group perimeter
 				 shape <- circle(	500#m);
+				 origin <- my_group;
+				 current <- my_group;
 	
 			}
 		}
@@ -83,11 +87,6 @@ global
 		
 	}
 	
-	/*reflex save_snubbies when:every(1#year ) and cycle!=0
-	{
-		write "../outputs/snubbies_"+current_date.year+"_"+cycle+".shp";
-		save Snubby  attributes: ["name"::name,"origin"::origin_group_id,"current"::current_group_id]  to:"../outputs/snubbies_"+current_date.year+"_"+cycle+".shp" type:"shp";
-	}*/
 	reflex save_groups when:false and every(1#year ) and cycle!=0
 	{
 		list<int> line<-[];
@@ -114,6 +113,13 @@ global
 	
 }
 
+species world_env
+{
+	aspect base
+	{
+		draw shape color:#black;
+	}
+}
 
 species habitats
 {
@@ -151,44 +157,67 @@ species Snubby_group
 
 species Snubby  skills:[moving]
 {
+
 	Snubby_group origin;
 	Snubby_group current <-nil;
 	int origin_group_id ->{origin.id};
 	int current_group_id ->{current=nil?-1:current.id};
 	float my_speed;
-	bool already_explore <- false;
+	bool is_exploring <- false;
+	rgb color <- #blue;
 	
-	reflex walk when: current = nil
+	reflex walk when: is_exploring = true
 	{
-		do wander speed:max_snubby_speed amplitude:60.0;
+		do wander speed:max_snubby_speed bounds:world_enveleloppe_shape amplitude:60.0;
 	}
 	
-	reflex be_explorer when:already_explore = false and origin = current
+	reflex stay when:is_exploring
 	{
-		bool explore <- flip(explorer_snubbies_hour);
-		if(explore = nil)
+		list<Snubby_group> local_group <- Snubby_group overlapping(self.location);
+		if(!empty(local_group))
 		{
-			current <- nil;
+			is_exploring <- false;
+			current <- one_of(local_group);
+		}
+		
+	}
+	
+	reflex be_explorer when: is_exploring = false
+	{
+		bool explore <- flip(0.01);//explorer_snubbies_hour);
+		if(explore = true)
+		{
+			is_exploring <- true;
 		}
 	}
-	reflex be_killed 
+	reflex be_killed when:is_exploring
 	{
-		habitats local_group <- first(habitats overlapping(self.location));
-		float secu <- local_group.security;
-		float probability_to_die <- local_group.security*max_snubby_survival_hour;
-		if(flip(probability_to_die)) {
-			create Snubby number:1 {
-				location <- any_location_in(origin.shape);
-				origin <- myself.origin;
-				current <- myself.origin;
+		habitats local_group <- one_of(habitats overlapping(self.location));
+		if(local_group=nil)
+		{
+			color <- #red;
+			shape <- circle(1200#m);
+		}
+		else
+		{
+			float secu <- local_group.security;
+			float probability_to_die <- local_group.security*max_snubby_survival_hour;
+			if(flip(1 - probability_to_die)) {
+				create Snubby number:1 {
+					origin <- myself.current;
+					current <- myself.current;
+					location <- any_location_in(current.shape);
+	
+				}
+				do die;		
 			}
-			do die;		
+			
 		}
 	}
 	
 	aspect base 
 	{
-		draw circle(500#m) color:#blue;
+		draw circle(500#m) color:origin!=current? #red:#blue;
 	}
 }
 
@@ -217,7 +246,9 @@ experiment run
 		/* display color map + groups + monkeys */
 		display map //type:opengl // draw the maps
 		{
+			species world_env aspect:base;
 			species habitats aspect:base;
+			
 			species Snubby_group aspect:base;
 			species Snubby aspect:base;
 		}
@@ -225,6 +256,8 @@ experiment run
 		/* display groups + monkeys only*/
 		display reading_map //type:gui // draw the maps
 		{
+			
+			species world_env aspect:base;
 			species Snubby_group aspect:base;
 			species Snubby aspect:base;
 		}
