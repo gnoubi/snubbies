@@ -32,7 +32,7 @@ global
 	float security_init_habitat_4 <- 0.1;
 	float security_init_habitat_5 <- 0.0;
 
-	float explorer_snubbies_init <- 0.01; //0.01;
+	float explorer_snubbies_init <- 0.1; //0.01;
 	float explorer_snubbies_hour<- 0.0;
 	
 	
@@ -106,7 +106,8 @@ global
 	
 	float convert_probability_from_year_to_hour(float value)
 	{
-		return exp( ln(value)/8760); //365*24
+		return value/8760; //365*24
+//		return exp( ln(value)/8760); //365*24
 	}
 	
 	
@@ -184,7 +185,7 @@ species Snubby  skills:[moving]
 	
 	reflex be_explorer when: is_exploring = false
 	{
-		bool explore <- flip(0.01);//explorer_snubbies_hour);
+		bool explore <- flip(explorer_snubbies_hour);
 		if(explore = true)
 		{
 			is_exploring <- true;
@@ -202,7 +203,7 @@ species Snubby  skills:[moving]
 		{
 			float secu <- local_group.security;
 			float probability_to_die <- local_group.security*max_snubby_survival_hour;
-			if(flip(1 - probability_to_die)) {
+			if(flip(probability_to_die)) {
 				create Snubby number:1 {
 					origin <- myself.current;
 					current <- myself.current;
@@ -257,7 +258,7 @@ experiment run
 		display reading_map //type:gui // draw the maps
 		{
 			
-			species world_env aspect:base;
+		//	species world_env aspect:base;
 			species Snubby_group aspect:base;
 			species Snubby aspect:base;
 		}
