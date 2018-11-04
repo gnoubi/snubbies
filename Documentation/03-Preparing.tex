@@ -234,6 +234,27 @@ rowSums(tabt)
 \end{lstlisting}
  
 
+\subsection{Shapefile}
+
+One uses the package \texttt{rgdal}. The shapefile can be read from any GIS as well. 
+
+\begin{lstlisting}
+library(rgdal)
+snub<-readOGR("U:/Users/pgiraudo2/gama_workspace/snubbies/outputs","snubby_2019_4392")
+head(snub@data)
+plot(snub)
+plot(snub[snub@data$origin!=snub@data$current,],col="red",fg="red",add=TRUE)
+
+groups<-readOGR("U:/Users/pgiraudo2/gama_workspace/snubbies/includes/groups","groups")
+plot(groups)
+plot(snub[snub@data$origin!=snub@data$current,],col="red",fg="red",add=TRUE)
+
+\end{lstlisting}
+
+
+
+
+
 \section{Analysing results}
 
 
