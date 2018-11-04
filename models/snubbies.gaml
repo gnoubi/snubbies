@@ -36,13 +36,14 @@ global
 	float explorer_snubbies_hour<- 0.0;
 	
 	int death ;
+	int simulation_id <- rnd(1000);
 	
 	geometry shape<- envelope(world_enveloppe); // define the area under study (universe)
 	date starting_date <- date([2018,11,6,0,0,0]);
 	geometry world_enveleloppe_shape;
 	
-	string OD_matrix_file_name <- "../outputs/transfer_";
-	string snubby_file_name <- "../outputs/snubby_";
+	string OD_matrix_file_name <- "../outputs/";
+	string snubby_file_name <- "../outputs/";
 	
 	init
 	{
@@ -50,7 +51,6 @@ global
 		death <- 0 ;
 		max_snubby_survival_hour<- convert_probability_from_year_to_hour(max_snubby_survival_init);
 		explorer_snubbies_hour <- convert_probability_from_year_to_hour(explorer_snubbies_init);
-		write "truc hour "+explorer_snubbies_hour;
 		create world_env from: world_enveloppe
 		{}
 		world_enveleloppe_shape <- first(world_env).shape;
@@ -83,9 +83,8 @@ global
 			create Snubby number:init_population // create individual monkeys based on the population size in each group 
 			{
 				location <- any_location_in(my_group.shape); // location anywhere within the group perimeter
-				 shape <- circle(	500#m);
-				 origin <- my_group;
-				 current <- my_group;
+				origin <- my_group;
+				current <- my_group;
 	
 			}
 		}
@@ -94,7 +93,7 @@ global
 	}
 	reflex save_snubby when: every(1#year ) and cycle!=0
 	{
-			save Snubby    to:snubby_file_name+string(current_date.year)+"_"+cycle+".shp" type:"shp" header:false rewrite: true with: [origin_group_id::"origin",current_group_id::"current"];
+			save Snubby    to:snubby_file_name+"simulation_"+simulation_id+"/snubby_"+string(current_date.year)+"_"+cycle+".shp" type:"shp" header:false rewrite: true with: [origin_group_id::"origin",current_group_id::"current"];
 	
 	}
 	reflex save_groups when: every(1#year ) and cycle!=0
@@ -107,7 +106,7 @@ global
 		{
 			line <- line + s0.id;
 		}
-		save line    to:OD_matrix_file_name+string(current_date.year)+"_"+cycle+".csv" type:"csv" header:false rewrite: false;
+		save line    to:OD_matrix_file_name+"simulation_"+simulation_id+"/transfer_"+string(current_date.year)+"_"+cycle+".csv" type:"csv" header:false rewrite: false;
 		
 		loop s1 over:group_list
 		{
@@ -116,7 +115,29 @@ global
 			{
 				add Snubby count(each.current = s1 and each.origin=s2) to:line;
 			}
-			save line    to:OD_matrix_file_name+string(current_date.year)+"_"+cycle+".csv" type:"csv" header:false rewrite: false;
+			save line    to:OD_matrix_file_name+"simulation_"+simulation_id+"/transfer_"+string(current_date.year)+"_"+cycle+".csv" type:"csv" header:false rewrite: false;
+		}
+	}
+	reflex save_groups_without_explorer_ when: every(1#year ) and cycle!=0
+	{
+		
+		
+		list<int> line<-[0];
+		list<Snubby_group> group_list <- list(Snubby_group);
+		loop s0 over:group_list
+		{
+			line <- line + s0.id;
+		}
+		save line    to:OD_matrix_file_name+"simulation_"+simulation_id+"/transfer_without_explorer_"+string(current_date.year)+"_"+cycle+".csv" type:"csv" header:false rewrite: false;
+		
+		loop s1 over:group_list
+		{
+			list<int> line<- [s1.id];
+			loop s2 over: group_list
+			{
+				add Snubby count(each.current = s1 and each.origin=s2 and each.is_exploring=false) to:line;
+			}
+			save line    to:OD_matrix_file_name+"simulation_"+simulation_id+"/transfer_without_explorer_"+string(current_date.year)+"_"+cycle+".csv" type:"csv" header:false rewrite: false;
 		}
 	}
 	
@@ -175,10 +196,9 @@ species Snubby_group
 species Snubby  skills:[moving]
 {
 
-init
-{
-	shape <- circle(50#m);
-}
+	init {
+		shape <- point(0,0);
+	}
 	Snubby_group origin;
 	Snubby_group current <-nil;
 	int origin_group_id ->{origin.id};
@@ -217,7 +237,7 @@ init
 		if(local_group=nil)
 		{
 			color <- #red;
-			shape <- circle(1200#m);
+			//shape <- circle(1200#m);
 		}
 		else
 		{
@@ -248,6 +268,7 @@ init
 
 experiment run
 {
+	parameter "simulation_id" var:simulation_id;
 	parameter "v_max" var:max_snubby_speed;
 	parameter "s_max" var:max_snubby_survival_init;
 	parameter "explorer_snubbies" var:explorer_snubbies_init;
@@ -266,7 +287,7 @@ experiment run
 	output
 	{
 		/* display color map + groups + monkeys */
-		display map //type:opengl // draw the maps
+		display map 
 		{
 			species world_env aspect:base;
 			species habitats aspect:base;
