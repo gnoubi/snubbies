@@ -42,6 +42,7 @@ global
 	geometry world_enveleloppe_shape;
 	
 	string OD_matrix_file_name <- "../outputs/transfer_";
+	string snubby_file_name <- "../outputs/snubby_";
 	
 	init
 	{
@@ -91,7 +92,11 @@ global
 		
 		
 	}
+	reflex save_snubby when: every(1#year ) and cycle!=0
+	{
+			save Snubby    to:snubby_file_name+string(current_date.year)+"_"+cycle+".shp" type:"shp" header:false rewrite: true with: [origin_group_id::"origin",current_group_id::"current"];
 	
+	}
 	reflex save_groups when: every(1#year ) and cycle!=0
 	{
 		
@@ -170,6 +175,10 @@ species Snubby_group
 species Snubby  skills:[moving]
 {
 
+init
+{
+	shape <- circle(50#m);
+}
 	Snubby_group origin;
 	Snubby_group current <-nil;
 	int origin_group_id ->{origin.id};
