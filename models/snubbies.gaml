@@ -35,13 +35,18 @@ global
 	float explorer_snubbies_init <- 0.1; //0.01;
 	float explorer_snubbies_hour<- 0.0;
 	
+	int death ;
 	
 	geometry shape<- envelope(world_enveloppe); // define the area under study (universe)
+	date starting_date <- date([2018,11,6,0,0,0]);
 	geometry world_enveleloppe_shape;
+	
+	string OD_matrix_file_name <- "../outputs/transfer_";
 	
 	init
 	{
 		step <- 1 #hour;
+		death <- 0 ;
 		max_snubby_survival_hour<- convert_probability_from_year_to_hour(max_snubby_survival_init);
 		explorer_snubbies_hour <- convert_probability_from_year_to_hour(explorer_snubbies_init);
 		write "truc hour "+explorer_snubbies_hour;
@@ -87,20 +92,26 @@ global
 		
 	}
 	
-	reflex save_groups when:false and every(1#year ) and cycle!=0
+	reflex save_groups when: every(1#year ) and cycle!=0
 	{
-		list<int> line<-[];
 		
-		ask Snubby_group
+		
+		list<int> line<-[0];
+		list<Snubby_group> group_list <- list(Snubby_group);
+		loop s0 over:group_list
 		{
-			Snubby_group me <- self;
-			list<int> line<- [];
-			ask Snubby_group
+			line <- line + s0.id;
+		}
+		save line    to:OD_matrix_file_name+string(current_date.year)+"_"+cycle+".csv" type:"csv" header:false rewrite: false;
+		
+		loop s1 over:group_list
+		{
+			list<int> line<- [s1.id];
+			loop s2 over: group_list
 			{
-				line <- line + Snubby count(each.current = self and each.origin=me);
+				add Snubby count(each.current = s1 and each.origin=s2) to:line;
 			}
-			save line    to:"../outputs/population_"+current_date.year+"_"+cycle+".shp" type:"shp" rewrite: false;
-			
+			save line    to:OD_matrix_file_name+string(current_date.year)+"_"+cycle+".csv" type:"csv" header:false rewrite: false;
 		}
 	}
 	
@@ -210,6 +221,7 @@ species Snubby  skills:[moving]
 					location <- any_location_in(current.shape);
 	
 				}
+				death <- death+1;
 				do die;		
 			}
 			
@@ -254,6 +266,8 @@ experiment run
 			species Snubby aspect:base;
 		}
 		monitor "viscosity_factor_habitat_1" value:viscosity_init_habitat_1;
+		monitor "number_of_migration" value: Snubby count(each.origin != each.current);
+		monitor "number_of_death" value: death;
 		/* display groups + monkeys only*/
 		display reading_map //type:gui // draw the maps
 		{
