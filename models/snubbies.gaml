@@ -275,7 +275,7 @@ experiment run
 			species Snubby aspect:base;
 		}
 		monitor "viscosity_factor_habitat_1" value:viscosity_init_habitat_1;
-		monitor "number_of_migration" value: Snubby count(each.origin != each.current);
+		monitor "number_of_dispersers" value: Snubby count(each.origin != each.current);
 		monitor "number_of_death" value: death;
 		/* display groups + monkeys only*/
 		display reading_map //type:gui // draw the maps

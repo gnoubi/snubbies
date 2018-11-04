@@ -48,8 +48,8 @@ attributes(ex1)
 The duration of each simulation is stored in a variable, here named \texttt{simulation\_duration} and the number of experiments to run in the variable \texttt{B}
 
 \begin{lstlisting}
-simulation_duration <- 5 * 365 * 24 # five years (step is one hour)
-B<-10 # number of simulations
+simulation_duration <- 2 * 365 * 24 # two years (step is one hour)
+B<-2 # number of simulations
 \end{lstlisting}
 
 Now, a data.frame must be prepared with each row the parameter values of each experiment. Note that parameters can be explored randomly allocating values between limits. See for instance the function \texttt{runif} in R (but many others are available).
@@ -65,9 +65,9 @@ Values can be defined quite flexibly and the value(s) of a given parameter can b
 simuls<-data.frame(
 v_max=0.3472222,
 s_max=0.5,
-explorer_snubbies=runif(B,0.001,0.1), # random allocation between 0.001 and 0.1 (uniform distribution)
-viscosity_factor_habitat_1=runif(B,0.9,1),
-viscosity_factor_habitat_2=viscosity_factor_habitat_1*0.9, # the value is defined as a function of another value; here we want viscosity_factor_habitat_2 always be 0.9*viscosity_factor_habitat_1
+explorer_snubbies=runif(B,0.1,0.5),
+viscosity_factor_habitat_1=1,
+viscosity_factor_habitat_2=0.9,
 viscosity_factor_habitat_3=0.5,
 viscosity_factor_habitat_4=0.1,
 viscosit_factor_habitat_5=0,
@@ -77,31 +77,35 @@ security_factor_habitat_3=0.5,
 security_factor_habitat_4=0.1,
 security_factor_habitat_5=0
 )
+
+simuls
+
 \end{lstlisting}
 
 Then, experiments can be prepared. This will end up by the creation of one variable \texttt{experimentplan} and as many XML files as experiments (e.g. the number of row of \texttt{simuls}). \textcolor{red}{Pay attention about the unusual way to specify the path with \texttt{setmodelpath}, with a slash "/U:/..." at the beginning. This is a provisory way to get around a bug of gama-headless running on Windows}.
 
 \begin{lstlisting}
-for (i in 1:nrow(simuls)) {
+for (i in 1:nrow(simuls))
+{
 local_experiment <- experiment1
 local_experiment <-  setparametervalue(local_experiment,"max_snubby_speed",simuls[i,"v_max"])
 local_experiment <-  setparametervalue(local_experiment,"max_snubby_survival_init",simuls[i,"s_max"])
 local_experiment <-  setparametervalue(local_experiment,"explorer_snubbies_init",simuls[i,"explorer_snubbies"])
-local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_1",simuls[i,"viscosity_factor_habitat_1"])
-local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_2",simuls[i,"viscosity_factor_habitat_2"])
-local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_3",simuls[i,"viscosity_factor_habitat_3"])
-local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_4",simuls[i,"viscosity_factor_habitat_4"])
-local_experiment <-  setparametervalue(local_experiment," viscosity_init_habitat_5",simuls[i,"viscosity_factor_habitat_5"])
-local_experiment <-  setparametervalue(local_experiment," security_init_habitat_1",simuls[i,"security_factor_habitat_1"])
-local_experiment <-  setparametervalue(local_experiment," security_init_habitat_2",simuls[i,"security_factor_habitat_2"])
-local_experiment <-  setparametervalue(local_experiment," security_init_habitat_3",simuls[i,"security_factor_habitat_3"])
-local_experiment <-  setparametervalue(local_experiment," security_init_habitat_4",simuls[i,"security_factor_habitat_4"])
-local_experiment <-  setparametervalue(local_experiment," security_init_habitat_5",simuls[i,"security_factor_habitat_5"])
+local_experiment <-  setparametervalue(local_experiment,"viscosity_init_habitat_1",simuls[i,"viscosity_factor_habitat_1"])
+local_experiment <-  setparametervalue(local_experiment,"viscosity_init_habitat_2",simuls[i,"viscosity_factor_habitat_2"])
+local_experiment <-  setparametervalue(local_experiment,"viscosity_init_habitat_3",simuls[i,"viscosity_factor_habitat_3"])
+local_experiment <-  setparametervalue(local_experiment,"viscosity_init_habitat_4",simuls[i,"viscosity_factor_habitat_4"])
+local_experiment <-  setparametervalue(local_experiment,"viscosity_init_habitat_5",simuls[i,"viscosity_factor_habitat_5"])
+local_experiment <-  setparametervalue(local_experiment,"security_init_habitat_1",simuls[i,"security_factor_habitat_1"])
+local_experiment <-  setparametervalue(local_experiment,"security_init_habitat_2",simuls[i,"security_factor_habitat_2"])
+local_experiment <-  setparametervalue(local_experiment,"security_init_habitat_3",simuls[i,"security_factor_habitat_3"])
+local_experiment <-  setparametervalue(local_experiment,"security_init_habitat_4",simuls[i,"security_factor_habitat_4"])
+local_experiment <-  setparametervalue(local_experiment,"security_init_habitat_5",simuls[i,"security_factor_habitat_5"])
 
 local_experiment <- setfinalstep(local_experiment,simulation_duration)
-
-local_experiment <- setoutputframerate(local_experiment,"map",10)
-local_experiment <- setoutputframerate(local_experiment,"reading_map",10)
+local_experiment <- setoutputframerate(local_experiment,"viscosity_init_habitat_1",1)
+# local_experiment <- setoutputframerate(local_experiment,"map",31*24)
+local_experiment <- setoutputframerate(local_experiment,"reading_map",30*24) # save the corresponding bit map every 30 days
 local_experiment <- setsimulationid(local_experiment,i)
 local_experiment <- setmodelpath(local_experiment,"/U:/Users/pgiraudo2/gama_workspace/snubbies/models/snubbies.gaml")
 
@@ -144,6 +148,8 @@ t1-t0
 
 \section{Reading results}
 
+\subsection{XML}
+
 Simulations results are stored in the folder \texttt{./workgamar}. There one finds:
 
 \begin{itemize}
@@ -182,9 +188,55 @@ results
 
 \end{lstlisting}
 
+\subsection{CSV}
 
+In the folder \texttt{outputs} one find CSV files whose names look like that: \texttt{transfer\_2019\_7200.csv}. They are the files which store monkey distribution in the groups at each selected time step.
 
+\begin{lstlisting}
+myfiles<-dir("./outputs",full.names = TRUE)
+trans<-rep(list(NA),length(myfiles))
+for(i in 1:length(myfiles)) trans[[i]]<-read.csv(myfiles[i],header=F)
+\end{lstlisting}
+
+Each file is in a list.
+
+First, let us extract the first simulation of the 10th saving.
+
+\begin{lstlisting}
+tabt<-trans[[10]][1:13,]
+colnames(tabt)<-paste0("G",tabt[1,])
+rownames(tabt)<-paste0("G",tabt[1,])
+tabt<-tabt[-1,-1]
+tabt
+
+> tabt
+    G6  G5 G15 G13 G14 G4 G12 G11  G9  G8  G7 G10
+G6  48   0   0   0   0  0   0   0   0   0   0   0
+G5   1 300   0   0   0  0   0   0   1   0   0   0
+G15  0   0  98   2   1  0   0   0   0   0   0   0
+G13  0   0   0 116   0  0   0   2   1   0   0   0
+G14  0   0   2   2  98  0   0   0   0   0   0   0
+G4   0   0   0   0   0 80   0   0   0   0   0   0
+G12  0   0   0   0   0  0  50   3   1   0   0   0
+G11  0   0   0   0   1  0   0 243   1   1   0   0
+G9   0   0   0   0   0  0   0   2 885   0   0   0
+G8   0   0   0   0   0  0   0   0   5 197   0   1
+G7   1   0   0   0   0  0   0   0   2   2 100   0
+G10  0   0   0   0   0  0   0   0   4   0   0  29
+\end{lstlisting}
+
+The first column gives the current distribution of individuals of the G6 group. 48 stayed in their group, 1 left for G5 and 1 for G7. 
+
+The sum of the first row, gives the current total number of individuals in a group. G6 has lost 2 individuals, so the sum of the row is 48. But G5 has gained 2 individuals, one from G6, the other from G9, but did not lose any, hence the size of the group is 1+300+1=302 (the sum of the row). The total number of individual in each group is easy to obtain:
+
+\begin{lstlisting}
+rowSums(tabt)
+\end{lstlisting}
+ 
 
 \section{Analysing results}
+
+
+
 
 To come soon...
