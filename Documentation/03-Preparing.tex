@@ -184,7 +184,7 @@ for(i in 1:length(outs)) {
 
 names(results)<-outs # one gives a name to each experiments
 
-results
+head(results[[1]])
 
 \end{lstlisting}
 
@@ -252,7 +252,23 @@ plot(snub[snub@data$origin!=snub@data$current,],col="red",fg="red",add=TRUE)
 \end{lstlisting}
 
 
-The shapefile can be read from any GIS as well. 
+The shapefile can be read from any GIS as well.  
+
+In both cases monkey location is given as a circle polygon (of class \texttt{SpatialPolygonsDataFrame} in R), which might not be optimal for display.
+
+In R one can easily extract the centroid of each polygon:
+
+\begin{lstlisting}
+snubpts<-getSpatialPolygonsLabelPoints(snub)
+plot(snubpts,pch=1,cex=0.5)
+plot(snubpts[snub@data$origin!=snub@data$current,],pch=19,col="red",fg="red",add=TRUE)
+\end{lstlisting}
+
+One can extract the geographical coordinates alone into a matrix as well:
+
+\begin{lstlisting}
+snubmat<-coordinates(snub)
+\end{lstlisting}
 
 
 \section{Analysing results}
