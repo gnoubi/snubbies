@@ -287,14 +287,14 @@ experiment run
 	output
 	{
 		/* display color map + groups + monkeys */
-		display map 
-		{
-			species world_env aspect:base;
-			species habitats aspect:base;
-			
-			species Snubby_group aspect:base;
-			species Snubby aspect:base;
-		}
+//		display map 
+//		{
+//			species world_env aspect:base;
+//			species habitats aspect:base;
+//			
+//			species Snubby_group aspect:base;
+//			species Snubby aspect:base;
+//		}
 		monitor "viscosity_factor_habitat_1" value:viscosity_init_habitat_1;
 		monitor "number_of_dispersers" value: Snubby count(each.origin != each.current);
 		monitor "number_of_death" value: death;
