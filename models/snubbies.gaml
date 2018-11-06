@@ -43,8 +43,8 @@ global
 	{
 		step <- 1 #hour;
 		death <- 0 ;
-		max_snubby_survival_hour<- convert_probability_from_year_to_hour(max_snubby_survival_init);
-		explorer_snubbies_hour <- convert_probability_from_year_to_hour(explorer_snubbies_init);
+		max_snubby_survival_hour<- 1-convert_probability_from_year_to_hour(max_snubby_survival_init);
+		explorer_snubbies_hour <- 1-convert_probability_from_year_to_hour(explorer_snubbies_init);
 		create world_boundaries from: world_enveloppe
 		{}
 		world_boundaries_shape <- first(world_boundaries).shape;
@@ -138,6 +138,7 @@ global
 	float convert_probability_from_year_to_hour(float value)
 	{
 		return value/8760; //365*24
+		//return exp( ln(value)/8760); //365*24 pas d'accord avec ta proposition
 	}
 	
 	
@@ -222,6 +223,7 @@ species Snubby  skills:[moving]
 		if(explore = true)
 		{
 			is_exploring <- true;
+			color <- #green;
 		}
 	}
 	reflex be_killed when:is_exploring
@@ -245,7 +247,7 @@ species Snubby  skills:[moving]
 			
 	aspect base 
 	{
-		draw circle(500#m) color:origin!=current? #red:#blue;
+	   draw circle(1500#m) color:origin!=current? #red:#blue;
 	}
 }
 

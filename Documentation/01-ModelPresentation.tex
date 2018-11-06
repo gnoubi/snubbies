@@ -55,8 +55,7 @@ parameters (real values known or unknown) on snubby dispersion.
 \begin{description}
 	\item[step] 1 hour (the iteration time resolution)
 	\item[maximum speed] the maximum speed (km/day) that can sustain a snubby in a favourable habitat
-	\item[maximum survival]  [0,1] the maximum survival in a favourable habitat. The end user give it per year ($s_y$), but this should be converted to the scale of the step (here hour), using the following formula:
-	$s_h=e^{\frac{\ln{s_y}}{365\times24}}$
+	\item[maximum survival]  [0,1] the maximum survival in a favourable habitat. The end user give it per year ($s_y$), but this should be converted to the scale of the step (here hour), using the following formula: $s_h=e^{\frac{\ln{s_y}}{365\times24}}$
 	\item[disperser proportion] the proportion of snubbies who evade their group and wander outside. The end user give it per year  ($p_y$), but this should be converted to the scale of the step (hour): $p_h=e^{\frac{\ln{p_y}}{365\times24}}$
 	\item[habitat viscosity] [0,1] the resistance of a given habitat.  Multiplies the maximum speed to give the speed really sustained in this habitat.
 	\item[habitat security] [0,1] the security of a given habitat.  Multiplies the maximum survival to give the actual survival in this habitat.
