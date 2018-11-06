@@ -49,8 +49,8 @@ global
 	{
 		step <- 1 #hour;
 		death <- 0 ;
-		max_snubby_survival_hour<- convert_probability_from_year_to_hour(max_snubby_survival_init);
-		explorer_snubbies_hour <- convert_probability_from_year_to_hour(explorer_snubbies_init);
+		max_snubby_survival_hour<- 1-convert_probability_from_year_to_hour(max_snubby_survival_init);
+		explorer_snubbies_hour <- 1-convert_probability_from_year_to_hour(explorer_snubbies_init);
 		create world_env from: world_enveloppe
 		{}
 		world_enveleloppe_shape <- first(world_env).shape;
@@ -143,8 +143,8 @@ global
 	
 	float convert_probability_from_year_to_hour(float value)
 	{
-		return value/8760; //365*24
-//		return exp( ln(value)/8760); //365*24
+//		return value/8760; //365*24
+		return exp( ln(value)/8760); //365*24
 	}
 	
 	
@@ -229,6 +229,7 @@ species Snubby  skills:[moving]
 		if(explore = true)
 		{
 			is_exploring <- true;
+			color <- #green;
 		}
 	}
 	reflex be_killed when:is_exploring
@@ -237,7 +238,6 @@ species Snubby  skills:[moving]
 		if(local_group=nil)
 		{
 			color <- #red;
-			//shape <- circle(1200#m);
 		}
 		else
 		{
@@ -259,7 +259,7 @@ species Snubby  skills:[moving]
 	
 	aspect base 
 	{
-		draw circle(500#m) color:origin!=current? #red:#blue;
+	   draw circle(1500#m) color:origin!=current? #red:#blue;
 	}
 }
 
@@ -295,7 +295,6 @@ experiment run
 //			species Snubby_group aspect:base;
 //			species Snubby aspect:base;
 //		}
-		monitor "viscosity_factor_habitat_1" value:viscosity_init_habitat_1;
 		monitor "number_of_dispersers" value: Snubby count(each.origin != each.current);
 		monitor "number_of_death" value: death;
 		/* display groups + monkeys only*/
