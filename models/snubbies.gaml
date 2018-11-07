@@ -10,9 +10,9 @@ global
 	file groups_file <- file("../includes/groups/groups.shp"); // read the shapefile of the groups
 	file habitat <- file("../includes/source2P/source2P.shp"); // read the shapefile of the habitats
 	file world_enveloppe <- file("../includes/source2P_envconc/source2P_envconc.shp");
-	float max_snubby_speed <-30#km/#day;
-	float max_snubby_survival_init <- 0.5;
-	float max_snubby_survival_hour <- 0.0;
+	float max_snubby_speed <-30#km/#day; // maximum speed (corresponding to the most favourable habitat)
+	float max_snubby_survival_init <- 0.5; // maximum survival over a year (corresponding to the most favourable habitat) 
+	float min_snubby_mortality_hour <- 0.0; // minimum mortality (corresponding to the most favourable habitat) hence to the maximum survival
 
 	float viscosity_init_habitat_1 <- 0.9;
 	float viscosity_init_habitat_2 <- 0.7;
@@ -24,9 +24,9 @@ global
 	float security_init_habitat_2 <- 0.9;
 	float security_init_habitat_3 <- 0.5;
 	float security_init_habitat_4 <- 0.1;
-	float security_init_habitat_5 <- 0.0;
+	float security_init_habitat_5 <- 0.01; // do not set to zero to avoid division by zero
 
-	float explorer_snubbies_init <- 0.1; //0.01;
+	float explorer_snubbies_init <- 0.1; //0.01; // proportion of snubby dispersing in a year (works like a survival)
 	float explorer_snubbies_hour<- 0.0;
 	
 	int death ;
@@ -43,8 +43,8 @@ global
 	{
 		step <- 1 #hour;
 		death <- 0 ;
-		max_snubby_survival_hour<- 1-convert_probability_from_year_to_hour(max_snubby_survival_init);
-		explorer_snubbies_hour <- 1-convert_probability_from_year_to_hour(explorer_snubbies_init);
+		min_snubby_mortality_hour<- 1-convert_probability_from_year_to_hour(max_snubby_survival_init);
+		explorer_snubbies_hour <- 1-convert_probability_from_year_to_hour(explorer_snubbies_init); 
 		create world_boundaries from: world_enveloppe
 		{}
 		world_boundaries_shape <- first(world_boundaries).shape;
@@ -137,8 +137,8 @@ global
 	
 	float convert_probability_from_year_to_hour(float value)
 	{
-		return value/8760; //365*24
-		//return exp( ln(value)/8760); //365*24 pas d'accord avec ta proposition
+		//return value/8760; //365*24 // pas d'accord avec ta proposition (on tranche à la belote ou au sabre :-) ?) PG
+		return exp(ln(value)/8760); //365*24 pas d'accord avec ta proposition NM
 	}
 	
 	
@@ -232,7 +232,8 @@ species Snubby  skills:[moving]
 		if(local_habitat!=nil)
 		{
 			float secu <- local_habitat.security;
-			float probability_to_die <- local_habitat.security*max_snubby_survival_hour;
+			float probability_to_die <- min_snubby_mortality_hour/local_habitat.security; 
+			if(probability_to_die>1) {probability_to_die<-1;} // truncating to 1 is not and optimal solution
 			if(flip(probability_to_die)) {
 				create Snubby number:1 {
 					origin <- myself.current;
@@ -240,7 +241,8 @@ species Snubby  skills:[moving]
 					location <- any_location_in(current.shape);
 	
 				}
-				do die;		
+				death<-death+1;
+				do die;	
 			}
 		}
 	}
@@ -277,23 +279,22 @@ experiment run
 		/* display color map + groups + monkeys */
 		display map 
 		{
-			species world_boundaries aspect:base;
+			//species world_boundaries aspect:base;
 			species habitats aspect:base;
 			
 			species Snubby_group aspect:base;
 			species Snubby aspect:base;
 		}
-		monitor "viscosity_factor_habitat_1" value:viscosity_init_habitat_1;
 		monitor "number_of_dispersers" value: Snubby count(each.origin != each.current);
 		monitor "number_of_death" value: death;
 		/* display groups + monkeys only*/
-		display reading_map //type:gui // draw the maps
-		{
-			
-		//	species world_env aspect:base;
-			species Snubby_group aspect:base;
-			species Snubby aspect:base;
-		}
+//		display reading_map //type:gui // draw the maps
+//		{
+//			
+//		//	species world_env aspect:base;
+//			species Snubby_group aspect:base;
+//			species Snubby aspect:base;
+//		}
 
 	}
 }
