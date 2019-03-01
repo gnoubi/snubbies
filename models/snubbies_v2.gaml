@@ -220,13 +220,11 @@ species Snubby  skills:[moving]
 	reflex choose_short_term_target when: is_exploring and my_longterm_target != nil and my_shortterm_target = nil
 	{
 		geometry current_perception <- circle(short_perception_distance);
-		
 		point myVec <- point({2 * (my_longterm_target.x -location.x ),2* ( my_longterm_target.y -location.y)});
 		
 		float angle <- 45.0;
 		point myVecR1 <- point({cos(angle)*myVec.x - sin(angle)*myVec.y,sin(angle)*myVec.x +cos(angle)*myVec.y  });		
 		point myVecR2 <- point({cos(angle)*myVec.x + sin(angle)*myVec.y, cos(angle)*myVec.y - sin(angle)*myVec.x  });
-		
 		point p1 <- location + myVecR1;
 		point p2 <- location + myVecR2;
 		
@@ -253,6 +251,11 @@ species Snubby  skills:[moving]
 		{
 			my_shortterm_target <- nil;
 		}
+	}
+	
+	reflex arrived when: my_longterm_target != nil and distance_to(location, my_longterm_target) < 100#m
+	{
+		my_longterm_target <- nil;
 	}
 	
 	reflex stay when:is_exploring
@@ -305,7 +308,7 @@ species Snubby  skills:[moving]
 
 
 
-experiment run
+experiment run 
 {
 	parameter "simulation_id" var:simulation_id;
 	parameter "v_max" var:max_snubby_speed;
@@ -322,7 +325,10 @@ experiment run
 	parameter "security_factor_habitat_3" var:security_init_habitat_3;
 	parameter "security_factor_habitat_4" var:security_init_habitat_4;
 	parameter "security_factor_habitat_5" var:security_init_habitat_5;
-	
+	init 
+	{
+		seed <- 12.1;
+	}
 	output
 	{
 		/* display color map + groups + monkeys */
