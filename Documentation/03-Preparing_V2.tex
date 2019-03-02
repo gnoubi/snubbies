@@ -3,56 +3,50 @@
 
 Most likely, for full size research, you will carry out simulations on intensive computing systems with hundreds of cores available  in parallel, to run thousands of experiments. Intensive computing systems generally use UNIX and simulations can be run in shell scripts using gama-headless.bat as an entry point. R can be run on such a platform as well and be used for simulations. Here, for teaching purpose, this training manual presents how to do it in R on Windows using a personal computer. Your computer has likely no more than 2-4 CPU, and it is advisable not to allocate more than two to the job (we will see later how to do it). In this context, running a large number of simulations or to simulate on a large number of time steps can be time consuming.
 
-\section{Installing gamar}
-\texttt{gamar} is a R package  available at \url{https://github.com/choisy/gamar}.
+\section{Installing rama}
+\texttt{rama} is a R package  available at \url{https://github.com/r-and-gama/rama}.
 
 With the \texttt{library(devtools)}, if not already installed, it can be installed on line as following:
 
 \begin{lstlisting}
 library(devtools)
-devtools::install_github("choisy/gamar")
-library(gamar)
+devtools::install_github("r-and-gama/rama")
+library(rama)
 \end{lstlisting}
 
 First, one declares the path to the program Gama.exe. Here below an example, but the path you are going to write must be adapted to your own computer:
 
 \begin{lstlisting}
-defpath("C:/Program Files/GAMA1.7RC2.Windows.64bits")
+setup_gama("U:/Users/Programmes extra/GAMA1.8_RC2_EmbeddedJDK_Win_64bits")
 \end{lstlisting}
 
-\section{Preparing experiments}
 
+\section{Preparing an experiment}
+
+An experiment is defined as a set of simulations each with various parameter values.
 
 \subsection{Reading the model}
 
-Now, one must read the model (here \texttt{snubbies.gaml}) and extract informations that will be used by R. The path to the model must be declared explicitely (here \texttt{snubbies.gaml}  is in the folder \texttt{"U:/Users/pgiraudo2/gama\_workspace/snubbies/models")}. Again this to adapt to your own computer.
+Now, one must read the model (here \texttt{snubbies\_V2.gaml}) and extract informations that will be used by R. The path to the model must be declared explicitely (here \texttt{snubbies\_V2.gaml}  is in the folder \texttt{"U:/Users/pgiraudo2/gama\_workspace/snubbies/models")}. Again this to adapt to your own computer.
 
 \begin{lstlisting}
-experiment1 <- getmodelparameter("U:/Users/pgiraudo2/gama_workspace/snubbies/models/snubbies.gaml","run")
-experiment1
+modpar<-get_parameters_names("U:/Users/pgiraudo2/gama_workspace/snubbies/models/snubbies_V2.gaml")
+modpar
 \end{lstlisting}
 
 
-For convenience, we have prepared some home-made functions to ease readings and parameter handling. They are in the file \texttt{HomeFunctions.r}. One sources it, and get a data.frame with attributes:
+\subsection{Preparing the experiment}
 
-\label{lab:sourcefunction}
-\begin{lstlisting}
-source("Homefunctions.r")
-ex1<-expe2df(experiment1)
-ex1
-attributes(ex1)
-\end{lstlisting}
+A data.frame must be prepared with each row the parameter values of each simulation.
 
-\subsection{Preparing the simulations}
-
-The duration of each simulation is stored in a variable, here named \texttt{simulation\_duration} and the number of experiments to run in the variable \texttt{B}
+The duration of each simulation is stored in a variable, here named \texttt{simulation\_duration} and the number of simulations to run in the variable \texttt{B}
 
 \begin{lstlisting}
 simulation_duration <- 2 * 365 * 24 # two years (step is one hour)
 B<-2 # number of simulations
 \end{lstlisting}
 
-Now, a data.frame must be prepared with each row the parameter values of each experiment. Note that parameters can be explored randomly allocating values between limits. See for instance the function \texttt{runif} in R (but many others are available).
+Note that parameters can be explored randomly allocating values between limits. See for instance the function \texttt{runif} in R (but many others are available).
 
 \begin{lstlisting}
 ?runif
@@ -82,7 +76,7 @@ simuls
 
 \end{lstlisting}
 
-Then, experiments can be prepared. This will end up by the creation of one variable \texttt{experimentplan} and as many XML files as experiments (e.g. the number of row of \texttt{simuls}). \textcolor{red}{Pay attention about the unusual way to specify the path with \texttt{setmodelpath}, with a slash "/U:/..." at the beginning. This is a provisory way to get around a bug of gama-headless running on Windows}.
+Then, the experiment can be prepared. This will end up by the creation of one variable \texttt{experimentplan} and as many XML files as experiments (e.g. the number of row of \texttt{simuls}). \textcolor{red}{Pay attention about the unusual way to specify the path with \texttt{setmodelpath}, with a slash "/U:/..." at the beginning. This is a provisory way to get around a bug of gama-headless running on Windows}.
 
 \begin{lstlisting}
 for (i in 1:nrow(simuls))

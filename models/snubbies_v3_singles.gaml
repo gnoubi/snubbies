@@ -7,7 +7,7 @@ model snubbies
 
 global
 {
-	file groups_file <- file("../includes/groups/groups.shp"); // read the shapefile of the groups
+	file groups_file <- file("../includes/groups_single/groups_single.shp"); // read the shapefile of the groups
 	file habitat <- file("../includes/source2P/source2P.shp"); // read the shapefile of the habitats
 	file world_enveloppe <- file("../includes/source2P_envconc/source2P_envconc.shp");
 	float max_snubby_speed <-30#km/#day; // maximum speed (corresponding to the most favourable habitat)
